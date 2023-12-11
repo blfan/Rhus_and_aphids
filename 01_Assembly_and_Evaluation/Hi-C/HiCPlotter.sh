@@ -1,0 +1,1 @@
+python2 ../../HiCPlotter.py -f ../analysis/hic_results/matrix/YFM/raw/150000/YFM_150000.matrix -bed ../analysis/hic_results/matrix/YFM/raw/150000/YFM_150000_abs.bed -n YFM -r 150000 -chr Chr15 -o YFM -wg 1 -ptr 0 -tri 1 -ext pdf

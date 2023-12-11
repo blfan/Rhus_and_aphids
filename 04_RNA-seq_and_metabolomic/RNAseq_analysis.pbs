@@ -1,0 +1,70 @@
+#!/bin/bash
+#PBS -l nodes=cu06:ppn=16
+#PBS -q normal
+
+# Step 1: fastp
+#PBS -N fastp
+#PBS -o /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/1.clean
+#PBS -e /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/1.clean
+cd /data/lhchen/WBZRNAseq_new/
+for i in *_1.fq.gz
+do
+base=$(basename $i "_1.fq.gz")
+fastp -i ${base}_1.fq.gz -I ${base}_2.fq.gz -o /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/1.clean/${base}_1.fp.fq.gz -O /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/1.clean/${base}_2.fp.fq.gz
+done
+
+# Step 2: trim_galore
+#PBS -N trim_galore
+#PBS -o /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/2.clean2
+#PBS -e /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/2.clean2
+cd /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/1.clean
+for i in *_1.fp.fq.gz
+do
+base=$(basename $i "_1.fp.fq.gz")
+trim_galore -q 20 --phred33 --length 20 -e 0.1 --stringency 3 --fastqc --paired -o /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/2.clean2 ${base}_1.fp.fq.gz ${base}_2.fp.fq.gz
+done
+
+# Step 3: hisat2
+#PBS -N hisat2
+#PBS -o /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/3.hisat2_sam
+#PBS -e /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/3.hisat2_sam
+cd /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/2.clean2
+for i in *_1.fp_val_1.fq.gz
+do
+base=$(basename $i "_1.fp_val_1.fq.gz")
+hisat2 -p 32 --dta -x /home/lhchen/test/Rhus_chinensis_Mill/test/genome/YFM_genome/index/YFM.genome.version1.fasta -1 ${base}_1.fp_val_1.fq.gz -2 ${base}_2.fp_val_2.fq.gz -S /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/3.hisat2_sam/${base}.hisat2.sam
+done
+
+# Step 4: view
+#PBS -N view
+#PBS -o /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/4.hisat2_bam
+#PBS -e /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/4.hisat2_bam
+cd /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/3.hisat2_sam
+for i in *.hisat2.sam
+do
+base=$(basename $i ".hisat2.sam")
+samtools view -bhS -t /home/lhchen/test/Rhus_chinensis_Mill/test/genome/YFM_genome/index/YFM.genome.version1.fasta/YFM.genome.version1.fasta.fai -@ 16 -o /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/4.hisat2_bam/${base}.hisat2.bam ${base}.hisat2.sam
+done
+
+# Step 5: sort
+#PBS -N sort
+#PBS -o /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/5.hisat2_sort_bam
+#PBS -e /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/5.hisat2_sort_bam
+cd /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/4.hisat2_bam
+for i in *.hisat2.bam
+do
+base=$(basename $i ".hisat2.bam")
+samtools sort -@ 30 -o /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/5.hisat2_sort_bam/${base}.hisat2.sort.bam ${base}.hisat2.bam 
+done
+
+# Step 6: stringtie
+#PBS -N stringtie
+#PBS -o /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/6.ballgown
+#PBS -e /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/6.ballgown
+cd /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/5.hisat2_sort_bam
+for i in *.hisat2.sort.bam
+do
+base=$(basename $i ".hisat2.sort.bam")
+stringtie -e -p 54 -G /home/lhchen/test/Rhus_chinensis_Mill/test/genome/YFM_genome/index/YFM.genome.version2.gtf -o /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/6.ballgown/${base}/${base}.ballgown.gtf ${base}.hisat2.sort.bam -A /home/lhchen/test/Rhus_chinensis_Mill/test/RNA_seq/2.processed_data/RNAseq_new/6.ballgown/${base}/${base}.abundance.txt
+done
+

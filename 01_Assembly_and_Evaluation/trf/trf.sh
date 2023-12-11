@@ -1,0 +1,1 @@
+trf /home/blfan/project/wubeizi/Telomere/HFY/Chr01.fa 2 7 7 80 10 50 2000 -h

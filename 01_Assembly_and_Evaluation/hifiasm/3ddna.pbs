@@ -1,0 +1,16 @@
+#PBS -N 3dstep2.pbs
+#PBS -l nodes=cu02:ppn=30
+#PBS -o /data/blfan/wubeizi/Rhus2/3ddna/GYQ_hap2
+#PBS -e /data/blfan/wubeizi/Rhus2/3ddna/GYQ_hap2
+#PBS -q normal
+echo begin at: `date`
+cd /data/blfan/wubeizi/Rhus2/3ddna/GYQ_hap2 && \
+
+#quast.py canu.contigs.fasta -o quast_output
+#busco -i /home/blfan/project/wubeizi/canu1_3/X101SC21043633-Z04-F001/canu.contigs.fasta -o out -m geno -l eudicots_odb10
+#hifiasm -o out -t 32 /home/blfan/project/wubeizi/canu1_3/X101SC21043633-Z04-F002/m64168e_210701_001029.hifi_reads.fasta.gz 2>hifiasm.log
+#/home/blfan/software/HiC-Pro-master/bin/HiC-Pro -c config-hicpro.txt -o analysis -i /home/blfan/project/wubeizi/Hic-pro/YFM/data
+#~/software/juicer/scripts/juicer.sh -g GYQ -s DpnII -z ./ref/genome.fasta -y ./ref/genome_DpnII.txt -p ./ref/genome.chrom.sizes -t 70 -D /home/blfan/software/juicer
+#~/software/3d-dna-master/run-asm-pipeline.sh -r 0 ./ref/genome.fasta ./aligned/merged_nodups.txt
+~/software/3d-dna-master/run-asm-pipeline-post-review.sh -r genome.final.review.assembly ./ref/genome.fasta ./aligned/merged_nodups.txt
+echo end at: `date`
