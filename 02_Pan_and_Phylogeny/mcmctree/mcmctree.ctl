@@ -26,7 +26,7 @@
 
          print = 1
         burnin = 2000
-      sampfreq = 2
+      sampfreq = 10
        nsample = 20000
 
 *** Note: Make your window wider (100 columns) before running the program.
