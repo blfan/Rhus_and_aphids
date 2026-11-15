@@ -10,3 +10,7 @@
     Convergent evolution and coevolution between Rhus and host aphids
 ### 04 RNA-seq and metabolomic
 	Analysis of the metabolome and proteome at four stages
+
+## Figure data:
+    Selected source data for Figuress are provided in Figure_Data.xlsx.
+    The workbook contains data tables and a summary sheet linking each table to the corresponding figure panel(s).
